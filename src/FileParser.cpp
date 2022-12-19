@@ -41,3 +41,19 @@ string FileParser::get_filename() {
     */
     return this->filename;
 }
+
+//  Filename setter
+void FileParser::set_delimiter(char delimiter) {
+    /*
+        Setter method for filename
+    */
+    this->delimiter = delimiter;
+}
+
+//  Filename getter
+char FileParser::get_delimiter() {
+    /*
+        Getter method for filename
+    */
+    return this->delimiter;
+}
