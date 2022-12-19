@@ -8,7 +8,6 @@ private:
     char delimiter;
     vector<string> data_lines;
     void parse();
-
 public:
     FileParser();                   //  Default constructor
     FileParser(string, char);       //  Parameterized constructor for filename and delimiter
@@ -17,5 +16,5 @@ public:
     void read_file();               //  Method to read file
     void clear();
     void set_delimiter(char);
-    void get_delimiter();
+    char get_delimiter();
 };
