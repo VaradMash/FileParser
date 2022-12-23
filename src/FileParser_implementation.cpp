@@ -13,6 +13,7 @@ FileParser :: FileParser() {
      */
     this->filename = "";
     this->delimiter = ' ';
+    this->word_count = 0;
 }
 
 //  Parameterized constructors implementation
@@ -24,6 +25,8 @@ FileParser :: FileParser(string filename) {
      */
     this->filename = filename;
     this->delimiter = ' ';
+    this->word_count = 0;
+    parse();
 }
 
 FileParser :: FileParser(string filename, char delimiter) {
@@ -34,27 +37,38 @@ FileParser :: FileParser(string filename, char delimiter) {
      */
     this->filename = filename;
     this->delimiter = delimiter;
+    this->word_count = 0;
+    parse();
 }
 
 //  Parser method (PRIVATE)
-void FileParser::parse(string line) {
+void FileParser::parse() {
     /*
      *  Input   :   Line    
      *  Utility :   Split line based on delimiter
      *  Output  :   Store split to vector
      */    
-    // Clear previous output
-    this->delimited_line.clear();
-    string data = "";
-    for(char c : line) {
-        if(c == this->delimiter) {
-            this->delimited_line.push_back(data);
-            data = "";
-        } else {
-            data.push_back(c);
+    //  Read file
+    this->read_file();    
+    for(string line : this->data_lines) {
+        // Define placeholder for storing split data    
+        vector<string> delimited_line;      
+        string data = "";
+        for(char c : line) {
+            if(c == this->delimiter) {
+                this->frequency_count[data] += 1;
+                delimited_line.push_back(data);
+                data = "";                
+            } else {
+                data.push_back(c);
+            }    
         }
-    }
-    this->delimited_line.push_back(data);    
+        delimited_line.push_back(data);          
+        this->frequency_count[data] += 1; 
+        // Store line to placeholder
+        this->delimited_lines.push_back(delimited_line);
+        this->word_count += delimited_line.size();
+    } 
 }
 
 //  Filename setter
@@ -63,6 +77,8 @@ void FileParser::set_filename(string filename) {
         Setter method for filename
     */
     this->filename = filename;
+    // Re parse file
+    this->parse();
 }
 
 //  Filename getter
@@ -79,6 +95,8 @@ void FileParser::set_delimiter(char delimiter) {
         Setter method for filename
     */
     this->delimiter = delimiter;
+    // Re parse file
+    this->parse();
 }
 
 //  Filename getter
@@ -96,14 +114,14 @@ void FileParser::read_file() {
      *  Utility :   Read file data and store lines
      *  Output  :   
      */
-    //  Erase previous data
-    this->data_lines.clear();
+    this->clear();
     try
     {
         this->infile.open(this->filename, ios_base::in);        
         for(string line ; getline(infile, line); ) {
             this->data_lines.push_back(line);
         }
+        this->infile.close();
     } catch(const std::exception& e) {
         std::cerr << e.what() << '\n';
     }    
@@ -128,7 +146,11 @@ void FileParser::clear() {
      *  Utility :   Clear read lines
      *  Output  :   None
      */
+    //  Erase previous data
     this->data_lines.clear();
+    this->frequency_count.clear();
+    this->delimited_lines.clear();  
+    this->word_count = 0;
 }
 
 //  Count words in file
@@ -137,13 +159,8 @@ int FileParser::get_word_count() {
      *  Input   :   Lines, delimiter
      *  Utility :   Get count of words by parsing each line
      *  Output  :   integer
-     */
-    int count = 0;
-    for(string line : this->data_lines) {
-        parse(line);
-        count += this->delimited_line.size();        
-    }
-    return count;
+     */    
+    return this->word_count;
 }
 
 int FileParser::get_line_count() {
@@ -164,4 +181,47 @@ string FileParser::get_line(int line_number) {
     if(line_number < 1) return "Invalid line";
     if(line_number > this->data_lines.size()) return "Line number exceeds file size";
     return this->data_lines[line_number - 1];
+}
+
+
+// Save Frequency count (all overrides)
+
+void FileParser::save_frequency(string outfile_name){
+    /*
+     *  Input   :   File name
+     *  Utility :   Save frequency count to plain text
+     *  Output  :   File
+     */
+    if(this->is_empty()) {
+        cout<<"File empty"<<endl;
+        return;
+    }
+    int name_length = outfile_name.length();
+    //   Check for correctness of file name
+    if(name_length == 0) outfile_name = "frequency_count_output.txt";
+    else if(name_length < 4) {
+        outfile_name = outfile_name + ".txt";
+    } else {
+        if(outfile_name == ".txt") {
+            outfile_name = "frequency_output.txt";
+        } else if(outfile_name.substr(name_length - 4) != ".txt") {
+            outfile_name += ".txt";
+        }
+    }
+    string output_data = "";
+    for(auto frequency_pair : this->frequency_count) {
+        string word = frequency_pair.first;
+        string frequency = to_string(frequency_pair.second);
+        output_data += word + "\t\t" + frequency + "\n";        
+    }
+    this->outfile.open(outfile_name, ios::out);
+    outfile<<output_data;
+    this->outfile.close();    
+}
+
+bool FileParser::is_empty() {
+    /*
+     *  Return true if file is empty
+     */
+    return this->data_lines.size() == 0;
 }
