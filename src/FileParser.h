@@ -9,10 +9,10 @@ private:
     string filename;
     char delimiter;
     int word_count;
-    vector<string> data_lines;
+    vector<string> data_lines;                  //  Placeholder to store all lines
     vector<vector<string>> delimited_lines;     //  Placeholder to store all delimited lines
     map<string, int> frequency_count;           //  Placeholder to store frequency count
-    void parse();    
+    void parse();
     ifstream infile;
     ofstream outfile;
 
@@ -30,8 +30,7 @@ public:
     int get_word_count();                       //  Method to get word count based on delimiter  
     int get_line_count();                       //  Method to get line count
     string get_line(int);                       //  Method to get specific line from file
-    void save_frequency(string);                //  Method to save word frequencies to file to plain text file
-    void save_frequency(string, string);        //  Method to save word frequencies to file to desired file format
+    void save_frequency(string);                //  Method to save word frequencies to file to desired text file
     bool is_empty();                            //  Method to check whether file is empty
     void display_lines();
 };
