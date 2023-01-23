@@ -195,25 +195,51 @@ void FileParser::save_frequency(string outfile_name){
     if(this->is_empty()) {
         cout<<"File empty"<<endl;
         return;
-    }
+    }    
     int name_length = outfile_name.length();
-    //   Check for correctness of file name
-    if(name_length == 0) outfile_name = "frequency_count_output.txt";
-    else if(name_length < 4) {
-        outfile_name = outfile_name + ".txt";
+    string word_seperator = ""; 
+    string line_seperator = "";
+    string line_start = "";
+    // Find file extension
+    string extension = "";
+    for(int i = name_length - 1; i >= 0; i--) {
+        extension = outfile_name[i] + extension;
+        if(outfile_name[i] == '.') break;
+    }
+    //  No extension found
+    if(extension == outfile_name) {
+        cout<<"Invalid file name.\nError code : No Extension provided."<<endl;
+        return;
+    }
+    //  Check for extensions
+    //  Supported extensions : .txt, .json, .xml
+    if(extension == ".txt") {
+        word_seperator = "\t\t";
+        line_seperator = "\n";
+    } else if(extension == ".json") {
+        line_start = "\t\"";
+        word_seperator = "\"\t:\t";
+        line_seperator = ",\n";
+    } else if(extension == ".xml") {
+        line_start = "<word>\n\t";
+        word_seperator = "\n</word>\n<frequency>\n\t";
+        line_seperator = "\n</frequency>\n";
     } else {
-        if(outfile_name == ".txt") {
-            outfile_name = "frequency_output.txt";
-        } else if(outfile_name.substr(name_length - 4) != ".txt") {
-            outfile_name += ".txt";
-        }
+        cout<<"Invalid file extension\n";
+        return;
     }
     string output_data = "";
+    if(extension == ".json") output_data += "{\n";
+    int n = this->frequency_count.size();
     for(auto frequency_pair : this->frequency_count) {
+        n -= 1;
         string word = frequency_pair.first;
         string frequency = to_string(frequency_pair.second);
-        output_data += word + "\t\t" + frequency + "\n";        
+        output_data += line_start + word + word_seperator + frequency ;
+        if(n == 0 && extension == ".json") continue;
+        output_data += line_seperator;               
     }
+    if(extension == ".json") output_data += "\n}";
     this->outfile.open(outfile_name, ios::out);
     outfile<<output_data;
     this->outfile.close();    
