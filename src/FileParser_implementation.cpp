@@ -220,16 +220,17 @@ void FileParser::save_frequency(string outfile_name){
         line_start = "\t\"";
         word_seperator = "\"\t:\t";
         line_seperator = ",\n";
-    } else if(extension == ".xml") {
-        line_start = "<word>\n\t";
-        word_seperator = "\n</word>\n<frequency>\n\t";
-        line_seperator = "\n</frequency>\n";
+    } else if(extension == ".xml") {        
+        line_start = "\t<word>\n\t\t";
+        word_seperator = "\n\t</word>\n\t<frequency>\n\t\t";
+        line_seperator = "\n\t</frequency>\n";
     } else {
         cout<<"Invalid file extension\n";
         return;
     }
     string output_data = "";
     if(extension == ".json") output_data += "{\n";
+    if(extension == ".xml") output_data += "<root>\n";
     int n = this->frequency_count.size();
     for(auto frequency_pair : this->frequency_count) {
         n -= 1;
@@ -240,6 +241,7 @@ void FileParser::save_frequency(string outfile_name){
         output_data += line_seperator;               
     }
     if(extension == ".json") output_data += "\n}";
+    if(extension == ".xml") output_data += "</root>\n";
     this->outfile.open(outfile_name, ios::out);
     outfile<<output_data;
     this->outfile.close();    
