@@ -71,6 +71,25 @@ void FileParser::parse() {
     } 
 }
 
+//  LCS Method (PRIVATE)
+int FileParser::longest_common_subsequence(string a, string b) {
+    /*
+     *  Compute length of longest common subsequence
+     */
+    int n = a.length(), m = b.length();
+    vector<vector<int>> dp(n + 1, vector<int>(m + 1, 0));
+    for(int i = 1; i <= n; i++) {
+        for(int j = 1; j <= m; j++) {
+            if(a[i - 1] == b[j - 1]) {
+                dp[i][j] = 1 + dp[i - 1][j - 1];
+            } else {
+                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+            }             
+        }
+    }
+    return dp[n][m];
+}
+
 //  Filename setter
 void FileParser::set_filename(string filename) {
     /*
@@ -252,4 +271,19 @@ bool FileParser::is_empty() {
      *  Return true if file is empty
      */
     return this->data_lines.size() == 0;
+}
+
+vector<string> FileParser::search_lines(string query) {
+    /*
+     *  Input   :   Query
+     *  Utility :   Search lines for given query based on LCS.
+     *  Output  :   Lines with threshold set to length of query     
+     */
+    vector<string> result;
+    int length = query.length();
+    for(string line : this->data_lines) {
+        int common = this->longest_common_subsequence(line, query);
+        if(common == length) result.push_back(line);
+    }        
+    return result;
 }
